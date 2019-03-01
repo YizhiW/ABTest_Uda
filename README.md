@@ -60,13 +60,13 @@ use your website, and what is the most important KPI that you want to improve.
 	* The metrics also need to be invariant against the noise
 	* A/A test is a way to test the robustness, also it's good for understanding what causes the change in the metrics.
 * **Common type of metrics** 
-	| Type | Distribution | Variance | 
-	| ---- | ------------ | ------- | 
+	* | Type | Distribution | Variance |
+	| :--- | :---: | ---: | 
 	| Sum  | normal | s^2/N |
 	| probability | binomial | p(1-p)/N |
 	| median/percentile | depends | depends |
 	| count/difference | normal | Var(x) + Var(Y) | 
-	| rates | poisson | x bar | 
+	| rates | Poisson | x bar | 
 	| ratio | depends | depends | 
 * **Empirical methods to get variance**
 	* Some funky metrics have complicated underlying distribution or don't even have analytical solution, then we have to 
@@ -74,5 +74,56 @@ use your website, and what is the most important KPI that you want to improve.
 	* The process is like historical simulation in quantitative finance, repeat A/A test, and get historical variance and 
 	confidence interval. It's also a good way to validate your analytical solution
 
+## Lesson 4
 
-	
+This lesson talks more details about how to perform the experiment, like how to decide the size, what unit of diversion you want to choose as 
+your metric parameters. A lot of concepts discussed here are related to the __online business__.
+
+* **Unit of diversion**
+	* Unit of diversion is the base unit of your data collection. You want users to have consistent experience. For example, 
+you want to test if a different layout would increase the CTR. The least wanted thing is to have your customers using the new layout 
+at day 1 and then have another layout at day 2. So unit of diversion is the distinguished identifier which will be treated the same from 
+beginning till end in your experiment. 
+	* Common unit of diversion is:
+		1. user ID
+		2. cookie
+		3. page view
+	* Your metrics will have more variability then analytical if your unit of diversion is different from the unit of variability. Analytical solution 
+	usually assume each event is independent, but the realty is not.
+* **Population and Size**
+	* Population controls who you are test against. It will reduce variability and noise from the test 
+	if you know exactly what's your target population
+	* **Cohort** is another common technique for choosing population. Cohort means you define two groups with similar entering time point to your experiment,
+	and tracking/comparing their performance in the experiment. By doing cohort you will have two groups that share same attributes and are exposed to the experiment 
+	same amount of time.
+	* Population also will affect the size you need for the experiment. Correct population will reduce variability, thus lower the size requirement for the same power and 
+	alpha.
+* Duration
+	* How long the test should go on. Depending on the scale you want for the test, more traffic exposed to the experiment means shorter duration. 
+	Common practice is to start with less traffic exposure, then ramp up.
+
+## Lesson 5
+
+Lesson 5 is all about how to analyze the result from your experiment.
+
+* No matter what you get, the first thing will be always sanity check. There are several aspects that you can take a look at:
+	1. Exploratory data analysis: break down the data into subgroup/time range/behavior, and see if there is abnormality 
+	2. Check the invariant variables: Think of metrics that won't be affected by your experiment, and check if they are actually invariant 
+	across control group and experiment group
+	3. Sign test: Check significance day by day, see if there is any patterns
+* If the result didn't pass sanity check, then it's a no-go. Need to revisit data collection/design
+* **Single metrics**
+	* If your result is not significant, similar to what we do now, dig deeper
+* **Multiple metrics**
+	* **Multiple-comparison**: 
+	The more metrics you have, the higher chance you will get a significant result. This is a large topic of how to properly do a 
+	multiple comparison. Here is several simple solutions to it:
+		1. Set a higher significance level:  a_all is the overall significance level you want, and a_ind is the significance level 
+		for each metric
+			* a_all = 1 - (1 - a_individual)^n
+		2. Bonferroni correction: This formula provides significance level for each metric without any assumptions, but sometimes could be too conservative 
+			* a_individual = a_all/n
+		3. Other methods like Boole-Bonferroni bound, etc.
+		4. Other strategy other than just use significance level
+			* False Discovery Rate (FDR): controls the E[# false positive/# rejects] instead of significance level
+		
