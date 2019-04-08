@@ -1,2 +1,3 @@
 # ignore ipython checkpoints
-.ipynb_checkpoints
+.*
+!/.gitignore
